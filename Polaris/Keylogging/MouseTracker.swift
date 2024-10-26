@@ -10,11 +10,27 @@ import ApplicationServices
 
 class MouseLocationManager: ObservableObject {
     @Published var mouseLocation: CGPoint = .zero
+    @Published var isTracking: Bool = false
+    
     private var eventTap: CFMachPort?
     private var runLoopSource: CFRunLoopSource?
     
-    init() {
+    init() {}
+    
+    func start() {
+        guard !isTracking else { return }
         setupEventTap()
+        isTracking = true
+    }
+    
+    func stop() {
+        guard isTracking else { return }
+        cleanupEventTap()
+        isTracking = false
+    }
+    
+    func getCurrentMouseLocation() -> CGPoint {
+        return mouseLocation
     }
     
     private func setupEventTap() {
@@ -44,10 +60,10 @@ class MouseLocationManager: ObservableObject {
             callback: callback,
             userInfo: UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
         ) else {
+            print("Failed to create event tap")
             return
         }
-        
-        // Create and add run loop source
+
         self.eventTap = eventTap
         self.runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, eventTap, 0)
         
@@ -57,13 +73,19 @@ class MouseLocationManager: ObservableObject {
         }
     }
     
-    deinit {
+    private func cleanupEventTap() {
         if let runLoopSource = runLoopSource {
             CFRunLoopRemoveSource(CFRunLoopGetMain(), runLoopSource, .commonModes)
+            self.runLoopSource = nil
         }
-        
         if let eventTap = eventTap {
             CGEvent.tapEnable(tap: eventTap, enable: false)
+            self.eventTap = nil
         }
+        mouseLocation = .zero
+    }
+    
+    deinit {
+        stop()
     }
 }

@@ -9,8 +9,10 @@ import SwiftUI
 
 struct AppMenu: View {
     
+    @AppStorage("enableMouseTracking") private var enableMouseTracking = false
     @Environment(\.openSettings) private var openSettings
     @EnvironmentObject var screenRecorder: ScreenRecorder
+    @EnvironmentObject var mouseRecorder: MouseLocationManager
     
     @State var isUnauthorized = false
     @State var showPickerSettingsView = false
@@ -21,6 +23,12 @@ struct AppMenu: View {
         }, label: { Text(screenRecorder.isRecordingStream ? "Stop Recording" : "Start Recording") })
         .keyboardShortcut("c", modifiers: [.shift, .command])
         .disabled(!screenRecorder.isRunning || isUnauthorized)
+        .onChange(of: screenRecorder.isRecordingStream) {
+            if enableMouseTracking {
+                if screenRecorder.isRecordingStream { mouseRecorder.start() }
+                else { mouseRecorder.stop() }
+            }
+        }
         
         Button(action: {
             screenRecorder.isPickerActive = true

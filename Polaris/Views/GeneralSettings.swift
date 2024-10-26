@@ -28,7 +28,7 @@ struct GeneralSettings: View {
     var body: some View {
         Form {
             Section("Display") {
-                Picker("Selected Display", selection: $screenRecorder.selectedDisplay) {
+                Picker("Selected display", selection: $screenRecorder.selectedDisplay) {
                     ForEach(screenRecorder.availableDisplays, id: \.self) { display in
                         Text(display.displayName)
                             .tag(SCDisplay?.some(display))
