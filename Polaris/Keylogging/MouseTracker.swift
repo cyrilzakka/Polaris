@@ -6,58 +6,64 @@
 //
 
 import SwiftUI
-import Combine
+import ApplicationServices
 
 class MouseLocationManager: ObservableObject {
     @Published var mouseLocation: CGPoint = .zero
-    @Published var windowLocation: CGPoint = .zero
-    
-    private var localMonitor: Any?
-    private var globalMonitor: Any?
-    private var window: NSWindow? {
-        NSApplication.shared.windows.first
-    }
+    private var eventTap: CFMachPort?
+    private var runLoopSource: CFRunLoopSource?
     
     init() {
-        setupMonitors()
+        setupEventTap()
     }
     
-    func setupMonitors() {
-        // Setup local monitor (within app windows)
-        localMonitor = NSEvent.addLocalMonitorForEvents(matching: [.mouseMoved]) { [weak self] event in
-            self?.updateLocations()
-            return event
-        }
-        
-        // Setup global monitor (entire screen)
-        globalMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.mouseMoved]) { [weak self] _ in
-            self?.updateLocations()
-        }
-        
-        // Enable mouse moved events for the window
-        window?.acceptsMouseMovedEvents = true
-    }
-    
-    private func updateLocations() {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            
-            // Update global mouse location
-            self.mouseLocation = NSEvent.mouseLocation
-            
-            // Update window-relative location if window exists
-            if let window = self.window {
-                self.windowLocation = window.mouseLocationOutsideOfEventStream
+    private func setupEventTap() {
+        // Create a callback as a block
+        let callback: CGEventTapCallBack = { (proxy, type, event, refcon) -> Unmanaged<CGEvent>? in
+            guard type == .mouseMoved else {
+                return Unmanaged.passRetained(event)
             }
+            let location = event.location
+            if let refcon = refcon {
+                let manager = Unmanaged<MouseLocationManager>.fromOpaque(refcon).takeUnretainedValue()
+                DispatchQueue.main.async {
+                    manager.mouseLocation = location
+                }
+            }
+            
+            return Unmanaged.passRetained(event)
+        }
+        
+        // Create event tap
+        let eventMask = CGEventMask(1 << CGEventType.mouseMoved.rawValue)
+        guard let eventTap = CGEvent.tapCreate(
+            tap: .cghidEventTap,
+            place: .headInsertEventTap,
+            options: .defaultTap,
+            eventsOfInterest: eventMask,
+            callback: callback,
+            userInfo: UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
+        ) else {
+            return
+        }
+        
+        // Create and add run loop source
+        self.eventTap = eventTap
+        self.runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, eventTap, 0)
+        
+        if let runLoopSource = self.runLoopSource {
+            CFRunLoopAddSource(CFRunLoopGetMain(), runLoopSource, .commonModes)
+            CGEvent.tapEnable(tap: eventTap, enable: true)
         }
     }
     
     deinit {
-        if let localMonitor = localMonitor {
-            NSEvent.removeMonitor(localMonitor)
+        if let runLoopSource = runLoopSource {
+            CFRunLoopRemoveSource(CFRunLoopGetMain(), runLoopSource, .commonModes)
         }
-        if let globalMonitor = globalMonitor {
-            NSEvent.removeMonitor(globalMonitor)
+        
+        if let eventTap = eventTap {
+            CGEvent.tapEnable(tap: eventTap, enable: false)
         }
     }
 }

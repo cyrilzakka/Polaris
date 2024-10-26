@@ -11,16 +11,17 @@ import SwiftUI
 struct PolarisApp: App {
     
     @StateObject var screenRecorder = ScreenRecorder()
-    
+    @StateObject var mouseRecorder = MouseLocationManager()
     
     var body: some Scene {
-        WindowGroup{
-            ContentView()
-                .environmentObject(screenRecorder)
-        }
+//        WindowGroup{
+//            ContentView()
+//                .environmentObject(screenRecorder)
+//        }
         MenuBarExtra("Polaris", systemImage: "macwindow.and.cursorarrow") {
             AppMenu()
                 .environmentObject(screenRecorder)
+                .environmentObject(mouseRecorder)
         }
        
         Settings {
