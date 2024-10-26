@@ -16,8 +16,6 @@ struct AppMenu: View {
     @State var showPickerSettingsView = false
     
     var body: some View {
-        
-        
         Button(action: {
             screenRecorder.isRecordingStream.toggle()
         }, label: { Text(screenRecorder.isRecordingStream ? "Stop Recording" : "Start Recording") })
