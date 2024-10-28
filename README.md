@@ -41,3 +41,6 @@ destination_folder/
 2. Open `Polaris.xcodeproj` in Xcode
 3. Select your development team in the project settings
 4. Build and run the project (⌘ + R)
+
+### Liability
+This software is provided "as is", without warranty of any kind. By using Polaris, you accept full responsibility for the data collected and how it is used. Always obtain proper consent before collecting any data and comply with all applicable privacy laws and regulations.

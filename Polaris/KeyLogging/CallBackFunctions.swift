@@ -4,6 +4,7 @@
 //
 //  Created by Cyril Zakka on 10/25/24.
 //
+// Adapted and modified from: https://github.com/SkrewEverything/Swift-Keylogger
 
 import Foundation
 import Cocoa

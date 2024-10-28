@@ -21,7 +21,15 @@ struct ContentView: View {
             }
             .padding()
             .frame(width: 300, height: 200)
+            .onAppear {
+                demoMouseMovement()
+            }
         }
+    
+    func demoMouseMovement() {
+        KeyControl.moveMouse(dx: 10, dy: 10)
+        KeyControl.move(to: CGPointMake(0, 0))
+    }
 }
 
 #Preview {
