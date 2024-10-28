@@ -660,36 +660,45 @@ func withTimeout<T>(seconds: TimeInterval, closure: @escaping () async throws ->
 class PolarisShell {
     private let tool = PolarisGUI()
     
+    private let primary = ""
+    private let deepPurple = "\u{001B}[38;5;104m"  // Deep purple for headers"
+    private let purple = "\u{001B}[38;5;183m"    // Light purple for headers
+    private let cyan = "\u{001B}[38;5;81m"       // Cyan for commands
+    private let gray = "\u{001B}[38;5;245m"      // Gray for descriptions
+    // private let yellow = "\u{001B}[38;5;222m"    // Yellow for parameters
+    // private let green = "\u{001B}[38;5;114m"     // Green for examples
+
+    
     func printUsage() {
         print("""
-        Available commands:
+        \(deepPurple)Available commands:\(reset)
         
-        MOUSE:
-        move <dx> <dy>       - Move mouse relative to current position
-        moveto <x> <y>       - Move mouse to absolute position
-        click                - Left click
-        rclick               - Right click
-        drag <x1> <y1> <x2> <y2> - Drag from (x1,y1) to (x2,y2)
-        scrollv <clicks>     - Scroll vertically (positive = up)
-        scrollh <clicks>     - Scroll horizontally (positive = right)
-        pos                  - Show current mouse position
+        \(deepPurple)MOUSE:\(reset)
+        \(primary)move\(reset) \(primary)<dx> <dy>\(reset) \(gray)- Move mouse relative to current position\(reset)
+        \(primary)moveto\(reset) \(primary)<x> <y>\(reset) \(gray)- Move mouse to absolute position\(reset)
+        \(primary)click\(reset) \(gray)- Left click\(reset)
+        \(primary)rclick\(reset) \(gray)- Right click\(reset)
+        \(primary)drag\(reset) \(primary)<x1> <y1> <x2> <y2>\(reset) \(gray)- Drag from (x1,y1) to (x2,y2)\(reset)
+        \(primary)scrollv\(reset) \(primary)<clicks>\(reset) \(gray)- Scroll vertically (positive = up)\(reset)
+        \(primary)scrollh\(reset) \(primary)<clicks>\(reset) \(gray)- Scroll horizontally (positive = right)\(reset)
+        \(primary)pos\(reset) \(gray)- Show current mouse position\(reset)
         
-        KEYBOARD:
-        key <key>           - Press a single key
-        keys <key1> <key2>  - Press key combination
+        \(deepPurple)KEYBOARD:\(reset)
+        \(primary)key\(reset) \(primary)<key>\(reset) \(gray)- Press a single key\(reset)
+        \(primary)keys\(reset) \(primary)<key1> <key2>\(reset) \(gray)- Press key combination\(reset)
         
-        SCREENSHOT:
-        shot                - Take a screenshot
+        \(deepPurple)SCREENSHOT:\(reset)
+        \(primary)shot\(reset) \(gray)- Take a screenshot\(reset)
         
-        OTHER:
-        help                - Show this help
-        exit                - Exit the program
+        \(deepPurple)OTHER:\(reset)
+        \(primary)help\(reset) \(gray)- Show this help\(reset)
+        \(primary)exit\(reset) \(gray)- Exit the program\(reset)
         
-        Examples:
-        > moveto 500 500    (Move mouse to x=500, y=500)
-        > click             (Perform left click)
-        > keys command c    (Copy)
-        > keys command v    (Paste)
+        \(deepPurple)Examples:\(reset)
+        \(primary)> moveto 500 500\(reset)    \(gray)(Move mouse to x=500, y=500)\(reset)
+        \(primary)> click\(reset)             \(gray)(Perform left click)\(reset)
+        \(primary)> keys command c\(reset)    \(gray)(Copy)\(reset)
+        \(primary)> keys command v\(reset)    \(gray)(Paste)\(reset)
         """)
     }
 
@@ -724,7 +733,7 @@ private let colors = [
         print("Type 'help' for available commands or 'exit' to quit.")
         
         while true {
-            print("\npolaris> ", terminator: "")
+            print("\n\(purple)polaris>\(reset) ", terminator: "")
             guard let input = readLine()?.trimmingCharacters(in: .whitespaces) else { continue }
             
             let components = input.split(separator: " ").map(String.init)
