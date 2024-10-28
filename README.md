@@ -18,7 +18,7 @@ Polaris is a powerful, open-source data collection and evaluation framework desi
 - Interactive shell for agent deployment
 - All features use official macOS APIs and require explicit user permission before data collection
 
-<img width="842" alt="Interactive Shell" src="https://github.com/user-attachments/assets/ff4d65c5-05b7-4657-964b-290d3cf6864e">
+<img width="730" alt="Interactive shell preview" src="https://github.com/user-attachments/assets/66d82302-caa2-4fb0-9282-bbb3e1cde77d">
 
 
 ### Getting Started
