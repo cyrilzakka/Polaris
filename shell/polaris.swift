@@ -693,13 +693,13 @@ class PolarisShell {
         """)
     }
 
-    private let colors = [
-        "\u{001B}[38;5;196m",  // Red
-        "\u{001B}[38;5;208m",  // Orange
-        "\u{001B}[38;5;226m",  // Yellow
-        "\u{001B}[38;5;46m",   // Green
-        "\u{001B}[38;5;21m",   // Blue
-        "\u{001B}[38;5;129m"   // Purple
+private let colors = [
+        "\u{001B}[38;5;183m",  // Light purple
+        "\u{001B}[38;5;147m",  // Lighter purple
+        "\u{001B}[38;5;146m",  // Medium purple
+        "\u{001B}[38;5;104m",  // Deeper purple
+        "\u{001B}[38;5;98m",   // Dark purple
+        "\u{001B}[38;5;92m"    // Indigo
     ]
     private let reset = "\u{001B}[0m"
     
