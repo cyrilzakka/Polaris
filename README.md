@@ -9,12 +9,13 @@
 
 
 ### About
-Polaris is a powerful, open-source data collection framework designed specifically for macOS to facilitate the training and deployment of AI agents. Polaris enables screen capture, keystroke logging, and mouse tracking, while maintaining user privacy and system performance.
+Polaris is a powerful, open-source data collection and evaluation framework designed for macOS to facilitate the training and deployment of AI agents. Polaris enables screen capture, keystroke logging, and mouse tracking, all while maintaining user privacy and system performance.
 
 ### Features
 - Key logging using low-level HID APIs to circumvent potential deprecation.
-- Screen capture built on the [ScreenCaptureKit framework ](https://developer.apple.com/documentation/screencapturekit/)
+- Screen and audio capture built on the [ScreenCaptureKit framework ](https://developer.apple.com/documentation/screencapturekit/)
 - Mouse tracking using `NSEvent.mouseLocation`
+- GUI control from Swift REPL using [PolarisGUI](https://github.com/cyrilzakka/PolarisGUI.git)
 - All features use official macOS APIs and require explicit user permission before data collection
 
 ### Data Collection
@@ -26,6 +27,20 @@ destination_folder/
 ├── recorded_output_2024-10-25_20-25-42.mp4
 └── recorded_output_2024-10-25_20-25-42.txt
 ```
+
+### Evaluation
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/cyrilzakka/PolarisGUI.git
+   cd PolarisGUI
+   ```
+2. Run `swift run --repl`
+3. In the REPL run:
+    ```swift
+    >>> import PolarisGUI
+    >>> PolarisGUI.moveMouse(dx: 10, dy: 10)
+    >>> PolarisGUI.vscroll(clicks: -10)
+    ```
 
 ### Development Setup
 #### Prerequisites
@@ -43,4 +58,7 @@ destination_folder/
 4. Build and run the project (⌘ + R)
 
 ### Liability
-This software is provided "as is", without warranty of any kind. By using Polaris, you accept full responsibility for the data collected and how it is used. Always obtain proper consent before collecting any data and comply with all applicable privacy laws and regulations.
+This software is provided "as is", without warranty of any kind. By using Polaris and PolarisGUI, you accept full responsibility for the data collected and how it is used. Always obtain proper consent before collecting any data and comply with all applicable privacy laws and regulations.
+
+### Acknowledgements
+This project was built using https://github.com/NakaokaRei/SwiftAutoGUI and https://github.com/SkrewEverything/Swift-Keylogger
