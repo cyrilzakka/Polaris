@@ -15,6 +15,7 @@ struct GeneralSettings: View {
     // Key logging
     @AppStorage("enableKeyLogger") private var enableKeyLogging = false
     @AppStorage("enableMouseTracking") private var enableMouseTracking = false
+    @AppStorage("scrollSensitivity") private var scrollSensitivity = 10
     
     // Output Path
     @State private var defaultPath: String = ""
@@ -50,8 +51,14 @@ struct GeneralSettings: View {
             }
             
             Section (content: {
-                Toggle("Enable key logging", isOn: $enableKeyLogging)
-                Toggle("Enable mouse tracking", isOn: $enableMouseTracking)
+                Toggle("Enable mouse and key logging", isOn: $enableKeyLogging)
+                Picker("Scroll Sensitivity", selection: $scrollSensitivity) {
+                    Text("High").tag(10)
+                    Text("Medium").tag(40)
+                    Text("Low").tag(90)
+                }
+                .pickerStyle(.menu)
+                .disabled(!enableKeyLogging)
             }, header: {
                 Text("Event Logging")
             }, footer: {
@@ -67,6 +74,9 @@ struct GeneralSettings: View {
                 .lineLimit(nil)
                 .foregroundColor(.secondary)
             })
+            // TODO: modify scrolling sensitivity to decrease noise as a picker
+            // TODO: Filter backspaces from log (bool). When enabled sequence logged before backspace and backspace are not logged
+            //
             //            Section (content: {
             //                VStack {
             //                    Picker("Save Directory:", selection: $outputPathSelection) {
