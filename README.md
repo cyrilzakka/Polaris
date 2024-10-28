@@ -18,12 +18,32 @@ Polaris is a powerful, open-source data collection and evaluation framework desi
 - Interactive shell for agent deployment
 - All features use official macOS APIs and require explicit user permission before data collection
 
+<img width="842" alt="Interactive Shell" src="https://github.com/user-attachments/assets/ff4d65c5-05b7-4657-964b-290d3cf6864e">
+
+
 ### Getting Started
 Clone the repository:
    ```bash
    git clone https://github.com/cyrilzakka/Polaris.git
    cd Polaris
    ```
+
+#### Data Collection
+- Xcode 16.0 or later
+- macOS 15.0 or later
+1. Open `Polaris.xcodeproj` in Xcode
+2. Select your development team in the project settings
+3. Build and run the project (⌘ + R)
+
+Click "Start Capture" in the menu bar icon to begin data collection. Keyboard inputs, mouse movements, and screen recordings are saved to your specified destination folder with the following structure:
+```
+destination_folder/
+├── recorded_output_2024-10-25_20-23-37.mp4   # Screen recording
+├── recorded_output_2024-10-25_20-23-37.txt   # Mouse, keyboard, and application events
+├── recorded_output_2024-10-25_20-25-42.mp4
+└── recorded_output_2024-10-25_20-25-42.txt
+```
+
 #### Interactive Shell
 1. Run the following commands:
    ```bash
@@ -43,22 +63,6 @@ Clone the repository:
     polaris> move 100 0
     Moved by (100, 0)
     ```
-
-#### Data Collection
-- Xcode 16.0 or later
-- macOS 15.0 or later
-1. Open `Polaris.xcodeproj` in Xcode
-2. Select your development team in the project settings
-3. Build and run the project (⌘ + R)
-
-Click "Start Capture" in the menu bar to begin collecting data. Keyboard inputs, mouse movements, and screen recordings are saved to your specified destination folder with the following structure:
-```
-destination_folder/
-├── recorded_output_2024-10-25_20-23-37.mp4  # Screen recording
-├── recorded_output_2024-10-25_20-23-37.txt   # Mouse and keyboard events
-├── recorded_output_2024-10-25_20-25-42.mp4
-└── recorded_output_2024-10-25_20-25-42.txt
-```
 
 ### Liability
 This software is provided "as is", without warranty of any kind. By using Polaris and PolarisGUI, you accept full responsibility for the data collected and how it is used. Always obtain proper consent before collecting any data and comply with all applicable privacy laws and regulations.
