@@ -734,7 +734,7 @@ private let colors = [
         
         while true {
             print("\n\(purple)polaris>\(reset) ", terminator: "")
-            guard let input = readLine()?.trimmingCharacters(in: .whitespaces) else { continue }
+            guard let input = readLine()?.trimmingCharacters(in: .whitespaces) else { exit(0) }
             
             let components = input.split(separator: " ").map(String.init)
             guard let command = components.first else { continue }
