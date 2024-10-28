@@ -15,10 +15,42 @@ Polaris is a powerful, open-source data collection and evaluation framework desi
 - Key logging using low-level HID APIs to circumvent potential deprecation.
 - Screen and audio capture built on the [ScreenCaptureKit framework ](https://developer.apple.com/documentation/screencapturekit/)
 - Mouse tracking using `NSEvent.mouseLocation`
-- GUI control from Swift REPL using [PolarisGUI](https://github.com/cyrilzakka/PolarisGUI.git)
+- Interactive shell for agent deployment
 - All features use official macOS APIs and require explicit user permission before data collection
 
-### Data Collection
+### Getting Started
+Clone the repository:
+   ```bash
+   git clone https://github.com/cyrilzakka/Polaris.git
+   cd Polaris
+   ```
+#### Interactive Shell
+1. Run the following commands:
+   ```bash
+   cd Shell
+   swiftc polaris.swift -o polaris
+   chmod +x polaris
+   ./polaris
+   ```
+2. In the interactive shell, run:
+    ```swift
+    polaris> shot
+    Screenshot taken!
+    
+    polaris> pos
+    Mouse position: (862, 596)
+    
+    polaris> move 100 0
+    Moved by (100, 0)
+    ```
+
+#### Data Collection
+- Xcode 16.0 or later
+- macOS 15.0 or later
+1. Open `Polaris.xcodeproj` in Xcode
+2. Select your development team in the project settings
+3. Build and run the project (⌘ + R)
+
 Click "Start Capture" in the menu bar to begin collecting data. Keyboard inputs, mouse movements, and screen recordings are saved to your specified destination folder with the following structure:
 ```
 destination_folder/
@@ -27,35 +59,6 @@ destination_folder/
 ├── recorded_output_2024-10-25_20-25-42.mp4
 └── recorded_output_2024-10-25_20-25-42.txt
 ```
-
-### Evaluation
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/cyrilzakka/PolarisGUI.git
-   cd PolarisGUI
-   ```
-2. Run `swift run --repl`
-3. In the REPL run:
-    ```swift
-    >>> import PolarisGUI
-    >>> PolarisGUI.moveMouse(dx: 10, dy: 10)
-    >>> PolarisGUI.vscroll(clicks: -10)
-    ```
-
-### Development Setup
-#### Prerequisites
-- Xcode 16.0 or later
-- macOS 15.0 or later
-
-#### Building the Project
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/cyrilzakka/Polaris.git
-   cd Polaris
-   ```
-2. Open `Polaris.xcodeproj` in Xcode
-3. Select your development team in the project settings
-4. Build and run the project (⌘ + R)
 
 ### Liability
 This software is provided "as is", without warranty of any kind. By using Polaris and PolarisGUI, you accept full responsibility for the data collected and how it is used. Always obtain proper consent before collecting any data and comply with all applicable privacy laws and regulations.
