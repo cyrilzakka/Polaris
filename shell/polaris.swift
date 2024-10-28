@@ -692,9 +692,35 @@ class PolarisShell {
         > keys command v    (Paste)
         """)
     }
+
+    private let colors = [
+        "\u{001B}[38;5;196m",  // Red
+        "\u{001B}[38;5;208m",  // Orange
+        "\u{001B}[38;5;226m",  // Yellow
+        "\u{001B}[38;5;46m",   // Green
+        "\u{001B}[38;5;21m",   // Blue
+        "\u{001B}[38;5;129m"   // Purple
+    ]
+    private let reset = "\u{001B}[0m"
+    
+    private func printBanner() {
+        let banner = [
+            #" ______      _              _"#,
+            #"(_____ \    | |            (_)"#,
+            #" _____) )__ | | _____  ____ _  ___"#,
+            #"|  ____/ _ \| |(____ |/ ___) |/___)  "#,
+            #"| |   | |_| | |/ ___ | |   | |___ |"#,
+            #"|_|    \___/ \_)_____|_|   |_(___/"#
+        ]
+        
+        for (index, line) in banner.enumerated() {
+            print(colors[index] + line + reset)
+        }
+    }
     
     func start() {
-        print("Welcome to PolarisGUI Interactive Shell!")
+        printBanner()
+        print("\nWelcome to Polaris Interactive Shell!")
         print("Type 'help' for available commands or 'exit' to quit.")
         
         while true {
@@ -706,7 +732,6 @@ class PolarisShell {
             
             switch command {
             case "exit", "quit":
-                print("Goodbye!")
                 return
                 
             case "help":
